@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Chequeo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- LOGIN -->
+ <div id="login-section">
+    <h1>🔐 Iniciar Sesión</h1>
+    <form id="login-form">
+      <input type="text" id="login-username" placeholder="Usuario" required>
+      <input type="password" id="login-password" placeholder="Contraseña" required>
+      <button type="submit">Entrar</button>
+    </form>
+
+    <h2>📝 Registrarse</h2>
+    <form id="register-form">
+      <input type="text" id="register-username" placeholder="Nuevo usuario" required>
+      <input type="password" id="register-password" placeholder="Contraseña" required>
+      <button type="submit">Registrar</button>
+    </form>
+  </div>
+
+  <!-- APP -->
+  <div id="app-section" style="display:none;">
+    <div class="clearfix">
+      <button id="logout-btn">Cerrar Sesión</button>
+    </div>
+
+    <div class="checklist">
+      <h1>📋 Lista de Chequeo</h1>
+
+      <div class="add-section">
+        <input type="text" id="new-section-input" placeholder="Nueva sección...">
+        <button id="add-section-btn">Añadir</button>
+      </div>
+
+      <div id="sections-container"></div>
+
+      <div class="global-progress">
+        <h2>📊 Avance General</h2>
+        <div class="progress-bar-container"><div class="progress-bar" id="global-bar"></div></div>
+        <div class="porcentaje" id="global-percent">0%</div>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
