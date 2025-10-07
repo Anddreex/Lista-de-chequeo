@@ -41,12 +41,26 @@
       <div id="sections-container"></div>
 
       <div class="global-progress">
-        <h2>📊 Avance General</h2>
-        <div class="progress-bar-container"><div class="progress-bar" id="global-bar"></div></div>
-        <div class="porcentaje" id="global-percent">0%</div>
-      </div>
+  <h2>📊 Avance General</h2>
+  
+  <!-- Contenedor de la gráfica -->
+  <div class="chart-container">
+    <canvas id="progressChart"></canvas>
+  </div>
+  
+  <!-- NUEVO: Detalles de las tareas -->
+  <div class="task-details" id="task-details">
+    <p class="completed-text">Completadas: 0 tareas (0%)</p>
+    <p class="pending-text">Pendientes: 0 tareas (0%)</p>
+  </div>
+  
+  <div class="progress-bar-container"><div class="progress-bar" id="global-bar"></div></div>
+  <div class="porcentaje" id="global-percent">0%</div>
+</div>
     </div>
   </div>
-  <script src="script.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

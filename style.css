@@ -288,3 +288,59 @@
       display: table;
       clear: both;
     }
+    /* Contenedor de la gráfica */
+.chart-container {
+  max-width: 300px;
+  margin: 0 auto 20px auto;
+  padding: 20px;
+}
+
+#progressChart {
+  max-height: 300px;
+}
+
+/* Detalles de tareas - MEJORADO */
+.task-details {
+  text-align: left;
+  margin: 20px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.task-details p {
+  margin: 10px 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.completed-text {
+  color: #155724;
+  background: #d4edda;
+  border-left: 4px solid #28a745;
+}
+
+.completed-text::before {
+  content: "✓";
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.pending-text {
+  color: #383d41;
+  background: #e2e3e5;
+  border-left: 4px solid #6c757d;
+}
+
+.pending-text::before {
+  content: "○";
+  font-size: 1.2rem;
+  font-weight: bold;
+}

@@ -1,5 +1,6 @@
 let currentUser = null;
 let userData = {};
+let progressChart = null; // Variable para almacenar la gráfica
 
 // Funciones de navegación
 function mostrarApp() {
@@ -45,13 +46,113 @@ async function loadUserData() {
   }
 }
 
+// Función para crear/actualizar la gráfica
+function createOrUpdateChart(completed, pending) {
+  const ctx = document.getElementById('progressChart');
+  
+  if (!ctx) return;
+  
+  // Si ya existe una gráfica, actualizarla
+  if (progressChart) {
+    progressChart.data.datasets[0].data = [completed, pending];
+    progressChart.update();
+    return;
+  }
+  
+  // Crear nueva gráfica
+  progressChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Completadas', 'Pendientes'],
+      datasets: [{
+        data: [completed, pending],
+        backgroundColor: [
+          '#28a745',  // Verde para completadas
+          '#e9ecef'   // Gris claro para pendientes
+        ],
+        borderColor: [
+          '#28a745',
+          '#dee2e6'
+        ],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 15,
+            font: {
+              size: 12
+            }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.parsed || 0;
+              const total = completed + pending;
+              const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+              return `${label}: ${value} (${percentage}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// Función para actualizar el progreso global
+function updateGlobalProgress() {
+  let totalTasks = 0;
+  let completedTasks = 0;
+  
+  userData.sections.forEach(section => {
+    totalTasks += section.tasks.length;
+    completedTasks += section.tasks.filter(t => t.completed).length;
+  });
+  
+  const pendingTasks = totalTasks - completedTasks;
+  const percentValue = totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const completedPercent = totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const pendingPercent = totalTasks ? Math.round((pendingTasks / totalTasks) * 100) : 0;
+  
+  const globalBar = document.getElementById("global-bar");
+  const globalPercent = document.getElementById("global-percent");
+  
+  if (globalBar && globalPercent) {
+    globalBar.style.width = percentValue + "%";
+    globalPercent.textContent = percentValue + "%";
+  }
+  
+  // Actualizar detalles de tareas
+  const completedText = document.querySelector(".completed-text");
+  const pendingText = document.querySelector(".pending-text");
+  
+  if (completedText) {
+    completedText.textContent = `Completadas: ${completedTasks} tareas (${completedPercent}%)`;
+  }
+  if (pendingText) {
+    pendingText.textContent = `Pendientes: ${pendingTasks} tareas (${pendingPercent}%)`;
+  }
+  
+  // Actualizar o crear la gráfica solo si hay tareas
+  if (totalTasks > 0) {
+    createOrUpdateChart(completedTasks, pendingTasks);
+  }
+}
+
 // Inicialización al cargar la página
 document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("login-form");
   const registerForm = document.getElementById("register-form");
   const logoutBtn = document.getElementById("logout-btn");
 
-  // Por ahora siempre mostrar login (ya no hay persistencia de sesión)
+  // Por ahora siempre mostrar login
   mostrarLogin();
 
   // LOGIN
@@ -76,7 +177,6 @@ document.addEventListener("DOMContentLoaded", () => {
         await loadUserData();
         mostrarApp();
         initChecklist();
-        // Limpiar formulario
         document.getElementById("login-username").value = "";
         document.getElementById("login-password").value = "";
       } else {
@@ -112,7 +212,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (result.success) {
         alert("Usuario registrado con éxito, ahora inicia sesión");
-        // Limpiar formulario
         document.getElementById("register-username").value = "";
         document.getElementById("register-password").value = "";
       } else {
@@ -128,12 +227,17 @@ document.addEventListener("DOMContentLoaded", () => {
   logoutBtn.addEventListener("click", () => {
     currentUser = null;
     userData = {};
+    // Destruir la gráfica al cerrar sesión
+    if (progressChart) {
+      progressChart.destroy();
+      progressChart = null;
+    }
     mostrarLogin();
   });
 });
 
 // =====================
-// CHECKLIST (sin cambios en la lógica)
+// CHECKLIST
 // =====================
 function initChecklist() {
   const addSectionInput = document.getElementById("new-section-input");
@@ -166,7 +270,7 @@ function initChecklist() {
     };
 
     userData.sections.push(newSection);
-    saveUserData(); // Ahora es async pero no necesitamos esperar
+    saveUserData();
     
     createSectionElement(newSection, userData.sections.length - 1);
     addSectionInput.value = "";
@@ -259,7 +363,6 @@ function attachSectionEvents(section, sectionIndex) {
       userData.sections.splice(sectionIndex, 1);
       saveUserData();
       section.remove();
-      // Recargar para actualizar índices
       initChecklist();
     }
   });
@@ -336,7 +439,6 @@ function attachTaskEvents(li, sectionIndex, taskIndex) {
       const section = li.closest(".section");
       updateSectionProgress(section, sectionIndex);
       
-      // Recargar sección para actualizar índices
       initChecklist();
     }
   });
@@ -354,24 +456,4 @@ function updateSectionProgress(section, sectionIndex) {
   percent.textContent = percentValue + "%";
   
   updateGlobalProgress();
-}
-
-function updateGlobalProgress() {
-  let totalTasks = 0;
-  let completedTasks = 0;
-  
-  userData.sections.forEach(section => {
-    totalTasks += section.tasks.length;
-    completedTasks += section.tasks.filter(t => t.completed).length;
-  });
-  
-  const percentValue = totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0;
-  
-  const globalBar = document.getElementById("global-bar");
-  const globalPercent = document.getElementById("global-percent");
-  
-  if (globalBar && globalPercent) {
-    globalBar.style.width = percentValue + "%";
-    globalPercent.textContent = percentValue + "%";
-  }
 }
